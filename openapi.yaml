@@ -1,0 +1,702 @@
+openapi: 3.0.1
+info:
+  title: Smart Agenda API
+  description: API para una aplicación de gestión de tareas inteligente.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+tags:
+  - name: Users
+    description: Gestión de usuarios
+  - name: Tasks
+    description: Gestión de tareas
+  - name: Categories
+    description: Gestión de categorías
+  - name: Reminders
+    description: Gestión de recordatorios
+  - name: Integrations
+    description: Integración con otros servicios
+
+paths:
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: Registro de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - correo
+                - contraseña
+              properties:
+                nombre:
+                  type: string
+                correo:
+                  type: string
+                contraseña:
+                  type: string
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User created successfully
+        '400':
+          description: Error al crear usuario
+
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: Inicio de sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - correo
+                - contraseña
+              properties:
+                correo:
+                  type: string
+                contraseña:
+                  type: string
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Credenciales inválidas
+        '404':
+          description: Usuario no encontrado
+
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Obtener perfil de usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil de usuario obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  nombre:
+                    type: string
+                  correo:
+                    type: string
+        '401':
+          description: No autorizado
+
+    put:
+      tags:
+        - Users
+      summary: Actualizar perfil de usuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                correo:
+                  type: string
+                contraseña:
+                  type: string
+      responses:
+        '200':
+          description: Perfil actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Profile updated successfully
+        '401':
+          description: No autorizado
+
+  /tasks:
+    post:
+      tags:
+        - Tasks
+      summary: Crear una nueva tarea
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - título
+              properties:
+                título:
+                  type: string
+                descripción:
+                  type: string
+                fecha_de_vencimiento:
+                  type: string
+                  format: date-time
+                prioridad:
+                  type: string
+                categoría_id:
+                  type: string
+      responses:
+        '201':
+          description: Tarea creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  título:
+                    type: string
+                  descripción:
+                    type: string
+                  fecha_de_vencimiento:
+                    type: string
+                    format: date-time
+                  prioridad:
+                    type: string
+                  completado:
+                    type: boolean
+                  categoría_id:
+                    type: string
+        '401':
+          description: No autorizado
+
+    get:
+      tags:
+        - Tasks
+      summary: Obtener todas las tareas del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de tareas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    título:
+                      type: string
+                    descripción:
+                      type: string
+                    fecha_de_vencimiento:
+                      type: string
+                      format: date-time
+                    prioridad:
+                      type: string
+                    completado:
+                      type: boolean
+                    categoría_id:
+                      type: string
+        '401':
+          description: No autorizado
+
+  /tasks/{id}:
+    get:
+      tags:
+        - Tasks
+      summary: Obtener una tarea específica
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tarea obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  título:
+                    type: string
+                  descripción:
+                    type: string
+                  fecha_de_vencimiento:
+                    type: string
+                    format: date-time
+                  prioridad:
+                    type: string
+                  completado:
+                    type: boolean
+                  categoría_id:
+                    type: string
+        '401':
+          description: No autorizado
+
+    put:
+      tags:
+        - Tasks
+      summary: Actualizar una tarea
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                título:
+                  type: string
+                descripción:
+                  type: string
+                fecha_de_vencimiento:
+                  type: string
+                  format: date-time
+                prioridad:
+                  type: string
+                completado:
+                  type: boolean
+                categoría_id:
+                  type: string
+      responses:
+        '200':
+          description: Tarea actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Task updated successfully
+        '401':
+          description: No autorizado
+
+    delete:
+      tags:
+        - Tasks
+      summary: Eliminar una tarea
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tarea eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Task deleted successfully
+        '401':
+          description: No autorizado
+
+  /categories:
+    post:
+      tags:
+        - Categories
+      summary: Crear una nueva categoría
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+              properties:
+                nombre:
+                  type: string
+      responses:
+        '201':
+          description: Categoría creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  nombre:
+                    type: string
+        '401':
+          description: No autorizado
+
+    get:
+      tags:
+        - Categories
+      summary: Obtener todas las categorías del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de categorías obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nombre:
+                      type: string
+        '401':
+          description: No autorizado
+
+  /categories/{id}:
+    put:
+      tags:
+        - Categories
+      summary: Actualizar una categoría
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+      responses:
+        '200':
+          description: Categoría actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Category updated successfully
+        '401':
+          description: No autorizado
+
+    delete:
+      tags:
+        - Categories
+      summary: Eliminar una categoría
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Categoría eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Category deleted successfully
+        '401':
+          description: No autorizado
+
+  /tasks/search:
+    get:
+      tags:
+        - Tasks
+      summary: Buscar tareas por título o descripción
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tareas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    título:
+                      type: string
+                    descripción:
+                      type: string
+                    fecha_de_vencimiento:
+                      type: string
+                      format: date-time
+                    prioridad:
+                      type: string
+                    completado:
+                      type: boolean
+                    categoría_id:
+                      type: string
+        '401':
+          description: No autorizado
+
+  /tasks/{id}/completed:
+    patch:
+      tags:
+        - Tasks
+      summary: Marcar una tarea como completada
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                completado:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Tarea marcada como completada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Task marked as completed
+        '401':
+          description: No autorizado
+
+  /tasks/{id}/reminder:
+    post:
+      tags:
+        - Reminders
+      summary: Configurar recordatorios para una tarea
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fecha_hora
+              properties:
+                fecha_hora:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Recordatorio configurado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Reminder set successfully
+        '401':
+          description: No autorizado
+
+  /reminders:
+    get:
+      tags:
+        - Reminders
+      summary: Obtener recordatorios del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recordatorios obtenidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    tarea_id:
+                      type: string
+                    fecha_hora:
+                      type: string
+                      format: date-time
+        '401':
+          description: No autorizado
+
+  /reminders/{id}:
+    delete:
+      tags:
+        - Reminders
+      summary: Eliminar un recordatorio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recordatorio eliminado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Reminder deleted successfully
+        '401':
+          description: No autorizado
+
+  /integrations/google-calendar/sync:
+    post:
+      tags:
+        - Integrations
+      summary: Sincronizar con Google Calendar
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - googleAuthToken
+              properties:
+                googleAuthToken:
+                  type: string
+      responses:
+        '200':
+          description: Google Calendar sincronizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Google Calendar synced successfully
+        '401':
+          description: No autorizado
+
+  /integrations/google-calendar/events:
+    get:
+      tags:
+        - Integrations
+      summary: Obtener eventos de Google Calendar
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Eventos de Google Calendar obtenidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    summary:
+                      type: string
+                    start:
+                      type: string
+                      format: date-time
+                    end:
+                      type: string
+                      format: date-time
+        '401':
+          description: No autorizado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
